@@ -1,0 +1,70 @@
+Sub ProcessData()
+    Dim ws As Worksheet
+    Set ws = ActiveSheet
+    
+    ' Select B4 and everything to the right (like Ctrl+Shift+Right Arrow)
+    Dim lastCol As Long
+    lastCol = ws.Cells(4, ws.Columns.Count).End(xlToLeft).Column
+    
+    ' Copy the range from B7 to the last used cell in row 7
+    ws.Range(ws.Cells(7, 2), ws.Cells(7, lastCol)).Copy
+    
+    ' Paste into B11
+    ws.Range("B11").PasteSpecial Paste:=xlPasteAll
+    
+    ' Clear clipboard marquee (the "marching ants")
+    Application.CutCopyMode = False
+    
+    ' Select all cells in the active sheet and set format to General
+    Cells.Select
+    Selection.NumberFormat = "General"
+    
+    ' Deselect (return to cell A1)
+    Range("A1").Select
+    
+    ' Delete rows 1 to 10
+    ' IMPORTANT: Delete from bottom up to avoid row shifting issues
+    Rows("1:10").Delete Shift:=xlShiftUp
+    
+    ' Delete columns AB to AE, Delete column AC
+    ' IMPORTANT: Delete from right to left avoid row shifting issues
+    Columns("AB:AE").Delete Shift:=xlShiftToLeft
+    Columns("AC").Delete Shift:=xlShiftToLeft
+    
+    ' Set the value of cell AB1 to "Thermistor Calculated"
+    ActiveSheet.Range("AB1").Value = "Thermistor Calculated"
+    
+    Dim lastRow As Long
+    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
+    
+    ' Find columns by header name in row 1
+    Dim powerCol As Long, thermCol As Long, timeCol As Long
+    Dim searchCol As Long
+    
+    For searchCol = 1 To ws.UsedRange.Columns.Count
+        Select Case ws.Cells(1, searchCol).Value
+            Case "Time"                   ' <-- change to match your Time header
+                timeCol = searchCol
+            Case "Power"                  ' <-- change to match your Power header
+                powerCol = searchCol
+            Case "Thermistor Calculated"
+                thermCol = searchCol
+        End Select
+    Next searchCol
+    
+    ' Check all columns were found
+    If timeCol = 0 Or powerCol = 0 Or thermCol = 0 Then
+        MsgBox "Could not find one or more column headers. Please check the header names."
+        Exit Sub
+    End If
+    
+    ' Loop through rows - only apply fix within first 15 seconds AND power < 10
+    Dim i As Long
+    For i = 2 To lastRow
+        If ws.Cells(i, timeCol).Value <= 15 And ws.Cells(i, powerCol).Value < 10 Then
+            ws.Cells(i, thermCol).Value = 0
+        End If
+    Next i
+    
+    MsgBox "Done! Ts ez asfk"
+End Sub
