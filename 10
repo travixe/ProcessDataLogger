@@ -1,0 +1,52 @@
+' Get the file name without extension
+    Dim chartTitle As String
+    chartTitle = Left(ThisWorkbook.Name, InStrRev(ThisWorkbook.Name, ".") - 1)
+    
+    ' Find the last row and last column of data
+    Dim lastRow As Long
+    Dim lastCol As Long
+    lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+    lastCol = ws.Cells(1, ws.Columns.Count).End(xlToLeft).Column
+    
+    ' Create the chart
+    Dim chartObj As ChartObject
+    Set chartObj = ws.ChartObjects.Add( _
+        Left:=ws.Range("AE5").Left, _
+        Top:=ws.Range("AE5").Top, _
+        Width:=800, _
+        Height:=500)
+    
+    ' Set chart type to Line
+    chartObj.Chart.ChartType = xlLine
+    
+    ' Find the Time column
+    Dim timeCol As Long
+    Dim i As Long
+    For i = 1 To lastCol
+        If ws.Cells(1, i).Value = "Time" Then
+            timeCol = i
+        End If
+    Next i
+    
+    ' Add each column as a series, skipping Time
+    Dim srs As Series
+    Dim col As Long
+    For col = 1 To lastCol
+        If col <> timeCol Then
+            Set srs = chartObj.Chart.SeriesCollection.NewSeries
+            ' Set Y values (the data)
+            srs.Values = ws.Range(ws.Cells(2, col), ws.Cells(lastRow, col))
+            ' Set X values to Time column
+            srs.XValues = ws.Range(ws.Cells(2, timeCol), ws.Cells(lastRow, timeCol))
+            ' Set series name from header row
+            srs.Name = ws.Cells(1, col).Value
+            ' Move Power to secondary axis
+            If ws.Cells(1, col).Value = "Power" Then
+                srs.AxisGroup = xlSecondary
+            End If
+        End If
+    Next col
+    
+    ' Set chart title
+    chartObj.Chart.HasTitle = True
+    chartObj.Chart.ChartTitle.Text = chartTitle
