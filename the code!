@@ -1,0 +1,30 @@
+Sub ProcessData()
+    Dim ws As Worksheet
+    Set ws = ActiveSheet
+    
+    ' Select B4 and everything to the right (like Ctrl+Shift+Right Arrow)
+    Dim lastCol As Long
+    lastCol = ws.Cells(4, ws.Columns.Count).End(xlToLeft).Column
+    
+    ' Copy the range from B4 to the last used cell in row 4
+    ws.Range(ws.Cells(4, 2), ws.Cells(4, lastCol)).Copy
+    
+    ' Paste into B11
+    ws.Range("B11").PasteSpecial Paste:=xlPasteAll
+    
+    ' Clear clipboard marquee (the "marching ants")
+    Application.CutCopyMode = False
+    
+    ' Select all cells in the active sheet and set format to General
+    Cells.Select
+    Selection.NumberFormat = "General"
+    
+    ' Deselect (return to cell A1)
+    Range("A1").Select
+    
+    ' Delete rows 1 to 10
+    ' IMPORTANT: Delete from bottom up to avoid row shifting issues
+    Rows("1:10").Delete Shift:=xlShiftUp
+    
+    MsgBox "Done! All cells formatted as General."
+End Sub
