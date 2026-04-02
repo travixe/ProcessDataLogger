@@ -1,1 +1,132 @@
+Sub ProcessData()
+    Dim ws As Worksheet
+    Set ws = ActiveSheet
+    
+    ' ============================================================
+    ' STEP 1: Copy row 8 (B8 to last column) and paste into B12
+    ' ============================================================
+    Dim lastCol As Long
+    lastCol = ws.Cells(4, ws.Columns.Count).End(xlToLeft).Column
+    ws.Range(ws.Cells(8, 2), ws.Cells(8, lastCol)).Copy
+    ws.Range("B12").PasteSpecial Paste:=xlPasteAll
+    Application.CutCopyMode = False
+    
+    ' ============================================================
+    ' STEP 2: Format all cells as General
+    ' ============================================================
+    Cells.NumberFormat = "General"
+    
+    ' ============================================================
+    ' STEP 3: Delete rows 1 to 11
+    ' ============================================================
+    Rows("1:11").Delete Shift:=xlShiftUp
+    
+    ' ============================================================
+    ' STEP 4: Delete columns AB to AT, then column AC
+    ' ============================================================
+    Columns("AB:AT").Delete Shift:=xlShiftToLeft
+    Columns("AC").Delete Shift:=xlShiftToLeft
+    
+    ' ============================================================
+    ' STEP 5: Rename cell AB1 to "Thermistor Calculated"
+    ' ============================================================
+    ws.Range("AB1").Value = "Thermistor Calculated"
+    
+    ' ============================================================
+    ' STEP 6: Fix Thermistor Calculated values in first 15s
+    ' ============================================================
+    Dim lastRow As Long
+    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
+    
+    Dim powerCol As Long, thermCol As Long, timeCol As Long
+    Dim searchCol As Long
+    
+    For searchCol = 1 To ws.UsedRange.Columns.Count
+        Select Case ws.Cells(1, searchCol).Value
+            Case "Time":                  timeCol = searchCol
+            Case "Power":                 powerCol = searchCol
+            Case "Thermistor Calculated": thermCol = searchCol
+        End Select
+    Next searchCol
+    
+    If timeCol = 0 Or powerCol = 0 Or thermCol = 0 Then
+        MsgBox "Could not find one or more column headers. Please check the header names."
+        Exit Sub
+    End If
+    
+    Dim i As Long
+    For i = 2 To lastRow
+        If ws.Cells(i, timeCol).Value <= 15 And ws.Cells(i, powerCol).Value < 20 Then
+            ws.Cells(i, thermCol).Value = 0
+        End If
+    Next i
+    
+    ' ============================================================
+    ' STEP 7: Autofit all column widths
+    ' ============================================================
+    ws.Cells.EntireColumn.AutoFit
+    
+    ' ============================================================
+    ' STEP 8: Create Scatter with Smooth Lines chart at AE5
+    '         with Time as X axis and Power on secondary axis
+    ' ============================================================
+    Dim chartObj As ChartObject
+    Set chartObj = ws.ChartObjects.Add( _
+        Left:=ws.Range("AE10").Left, _
+        Top:=ws.Range("AE10").Top, _
+        Width:=1600, _
+        Height:=1000)
+    
+    chartObj.Chart.ChartType = xlLine
+    
+    Dim srs As Series
+    Dim col As Long
+    For col = 1 To 28
+        If col <> timeCol Then
+            Set srs = chartObj.Chart.SeriesCollection.NewSeries
+            srs.Values = ws.Range(ws.Cells(2, col), ws.Cells(lastRow, col))
+            srs.XValues = ws.Range(ws.Cells(2, timeCol), ws.Cells(lastRow, timeCol))
+            srs.Name = ws.Cells(1, col).Value
+            If ws.Cells(1, col).Value = "Power" Then
+                srs.AxisGroup = xlSecondary
+            End If
+        End If
+    Next col
+    
+    chartObj.Chart.HasTitle = True
+    chartObj.Chart.ChartTitle.Text = ws.Name
+    
+    ' ============================================================
+    ' STEP 9: Create summary table at AE5
+    ' ============================================================
+    
+    ' Copy headers B1 to AB1 and paste at AE5
+    ws.Range(ws.Cells(1, 2), ws.Cells(1, 28)).Copy
+    ws.Range("AE5").PasteSpecial Paste:=xlPasteAll
+    Application.CutCopyMode = False
+    
+    ' Add "Max" and "Min" labels in AD6 and AD7
+    ws.Range("AD6").Value = "Max"
+    ws.Range("AD7").Value = "Min"
+    
+    ' Add MAX and MIN formulas for each column (AE6 to BF7)
+    Dim c As Long
+    For c = 0 To 26  ' 27 columns (B to AB)
+        ' MAX formula in row 6
+        ws.Cells(6, 31 + c).Formula = "=MAX(" & ws.Cells(61, 2 + c).Address & ":" & ws.Cells(10000, 2 + c).Address & ")"
+        ' MIN formula in row 7
+        ws.Cells(7, 31 + c).Formula = "=MIN(" & ws.Cells(61, 2 + c).Address & ":" & ws.Cells(10000, 2 + c).Address & ")"
+    Next c
+    
+    ' ============================================================
+    ' STEP 10: Freeze panes at cell B2
+    ' ============================================================
+    ws.Range("B2").Select
+    ActiveWindow.FreezePanes = True
+    
+    MsgBox "Done!"
+End Sub
+
+
+
 
