@@ -1,7 +1,11 @@
 Sub ProcessData()
     Dim ws As Worksheet
     Set ws = ActiveSheet
-    
+
+    'this is basically for the hh7001 config test. we did so many, like so so so many config tests, i was tired of'
+    'manually processing each and every single data set so i decided to automate everything with one click instead'
+    '                   ⁶🤷‍♂️⁷                 -coded and programmed by the one and only travis  ദ്ദി(˵ •̀ ᴗ - ˵ ) ✧  '
+
     ' ============================================================
     ' STEP 1: Copy row 7 (B7 to last column) and paste into B11
     ' ============================================================
@@ -124,7 +128,7 @@ Sub ProcessData()
     ws.Range("B2").Select
     ActiveWindow.FreezePanes = True
     
-    MsgBox "Done!"
+    MsgBox "⁶🤷‍♂️⁷  Done!  ⁶🤷‍♂️⁷"
 End Sub
 
 
