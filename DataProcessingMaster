@@ -1,11 +1,7 @@
 Sub ProcessData()
     Dim ws As Worksheet
     Set ws = ActiveSheet
-
-    'this is basically for the hh7001 config test. we did so many, like so so so many config tests, i was tired of'
-    'manually processing each and every single data set so i decided to automate everything with one click instead'
-    '                                                          -coded and programmed by the one and only travis <3'
-
+    
     ' ============================================================
     ' STEP 1: Copy row 7 (B7 to last column) and paste into B11
     ' ============================================================
@@ -21,12 +17,11 @@ Sub ProcessData()
     Cells.NumberFormat = "General"
     
     ' ============================================================
-    ' STEP 3: Find "Comment" row, delete columns that are blank in that row
+    ' STEP 3: Find "Comment" row, delete columns that are blank
     ' ============================================================
     Dim commentRow As Long
     Dim cell As Range
     
-    ' Search column A for "Comment"
     For Each cell In ws.Range("A1:A100")
         If cell.Value = "Comment" Then
             commentRow = cell.Row
@@ -34,7 +29,6 @@ Sub ProcessData()
         End If
     Next cell
     
-    ' Delete blank columns from right to left (to avoid shifting issues)
     If commentRow > 0 Then
         Dim lastColUsed As Long
         lastColUsed = ws.Cells(commentRow, ws.Columns.Count).End(xlToLeft).Column
@@ -48,7 +42,7 @@ Sub ProcessData()
     End If
     
     ' ============================================================
-    ' STEP 4: Find "Time" in column A and delete all rows above it
+    ' STEP 4: Find "Time" in column A, delete all rows above it
     ' ============================================================
     Dim timeRow As Long
     
@@ -62,10 +56,13 @@ Sub ProcessData()
     If timeRow > 1 Then
         ws.Rows("1:" & timeRow - 1).Delete Shift:=xlShiftUp
     End If
+    
     ' ============================================================
-    ' STEP 5: Rename cell AB1 to "Thermistor Calculated"
+    ' STEP 5: Rename last column to "Thermistor Calculated"
     ' ============================================================
-    ws.Range("AB1").Value = "Thermistor Calculated"
+    Dim lastDataCol As Long
+    lastDataCol = ws.Cells(1, ws.Columns.Count).End(xlToLeft).Column
+    ws.Cells(1, lastDataCol).Value = "Thermistor Calculated"
     
     ' ============================================================
     ' STEP 6: Fix Thermistor Calculated values in first 15s
@@ -107,16 +104,16 @@ Sub ProcessData()
     ' ============================================================
     Dim chartObj As ChartObject
     Set chartObj = ws.ChartObjects.Add( _
-        Left:=ws.Range("AE10").Left, _
-        Top:=ws.Range("AE10").Top, _
-        Width:=1600, _
-        Height:=1000)
+        Left:=ws.Range("AE5").Left, _
+        Top:=ws.Range("AE5").Top, _
+        Width:=800, _
+        Height:=500)
     
-    chartObj.Chart.ChartType = xlLine
+    chartObj.Chart.ChartType = xlXYScatterSmooth
     
     Dim srs As Series
     Dim col As Long
-    For col = 1 To 28
+    For col = 1 To lastDataCol
         If col <> timeCol Then
             Set srs = chartObj.Chart.SeriesCollection.NewSeries
             srs.Values = ws.Range(ws.Cells(2, col), ws.Cells(lastRow, col))
@@ -132,26 +129,23 @@ Sub ProcessData()
     chartObj.Chart.ChartTitle.Text = ws.Name
     
     ' ============================================================
-    ' STEP 9: Create summary table at AE5
+    ' STEP 9: Create summary table with MAX and MIN formulas
     ' ============================================================
+    Dim summaryStartCol As Long
+    summaryStartCol = lastDataCol + 3
     
-    ' Copy headers B1 to AB1 and paste at AE5
-    ws.Range(ws.Cells(1, 2), ws.Cells(1, 28)).Copy
-    ws.Range("AE5").PasteSpecial Paste:=xlPasteAll
+    ws.Range(ws.Cells(1, 2), ws.Cells(1, lastDataCol)).Copy
+    ws.Cells(5, summaryStartCol).PasteSpecial Paste:=xlPasteAll
     Application.CutCopyMode = False
     
-    ' Add "Max" and "Min" labels in AD6 and AD7
-    ws.Range("AD6").Value = "Max"
-    ws.Range("AD7").Value = "Min"
+    ws.Cells(6, summaryStartCol - 1).Value = "Max"
+    ws.Cells(7, summaryStartCol - 1).Value = "Min"
     
-    ' Add MAX and MIN formulas for each column (AE6 to BF7)
-    Dim c As Long
-    For c = 0 To 26  ' 27 columns (B to AB)
-        ' MAX formula in row 6
-        ws.Cells(6, 31 + c).Formula = "=MAX(" & ws.Cells(61, 2 + c).Address & ":" & ws.Cells(10000, 2 + c).Address & ")"
-        ' MIN formula in row 7
-        ws.Cells(7, 31 + c).Formula = "=MIN(" & ws.Cells(61, 2 + c).Address & ":" & ws.Cells(10000, 2 + c).Address & ")"
-    Next c
+    Dim s As Long
+    For s = 0 To lastDataCol - 2
+        ws.Cells(6, summaryStartCol + s).Formula = "=MAX(" & ws.Cells(61, 2 + s).Address & ":" & ws.Cells(10000, 2 + s).Address & ")"
+        ws.Cells(7, summaryStartCol + s).Formula = "=MIN(" & ws.Cells(61, 2 + s).Address & ":" & ws.Cells(10000, 2 + s).Address & ")"
+    Next s
     
     ' ============================================================
     ' STEP 10: Freeze panes at cell B2
@@ -159,6 +153,5 @@ Sub ProcessData()
     ws.Range("B2").Select
     ActiveWindow.FreezePanes = True
     
-    MsgBox "done!!!"
+    MsgBox "Done!"
 End Sub
-
