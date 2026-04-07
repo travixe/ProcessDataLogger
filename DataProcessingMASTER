@@ -66,7 +66,7 @@ Sub ProcessData()
     ' ============================================================
     ws.Range("AB1").Value = "Thermistor Calculated"
     
-    ' ============================================================
+   ' ============================================================
     ' STEP 6: Fix Thermistor Calculated values in first 15s
     ' ============================================================
     Dim lastRow As Long
@@ -83,9 +83,6 @@ Sub ProcessData()
         End Select
     Next searchCol
     
-    ' DEBUG: Show what was found
-    MsgBox "Time col: " & timeCol & ", Power col: " & powerCol & ", Therm col: " & thermCol
-    
     If timeCol = 0 Or powerCol = 0 Or thermCol = 0 Then
         MsgBox "Could not find one or more column headers. Please check the header names."
         Exit Sub
@@ -93,7 +90,7 @@ Sub ProcessData()
     
     Dim i As Long
     For i = 2 To lastRow
-        If ws.Cells(i, timeCol).Value <= 15 And ws.Cells(i, powerCol).Value < 15 Then
+        If Val(ws.Cells(i, timeCol).Value) <= 15 And Val(ws.Cells(i, powerCol).Value) < 15 Then
             ws.Cells(i, thermCol).Value = 0
         End If
     Next i
