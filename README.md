@@ -59,12 +59,12 @@ Now every time you open any Excel file, you can go to Developer → Macros and P
 
 # Things to note
 
-### HIOKI lr8400 was for set hh7001 config test, and HIOKI lr8450 was for set A3 config test
+## HIOKI lr8400 was for set hh7001 config test, and HIOKI lr8450 was for set A3 config test
 
-### DataProcessingMaster is dynamic, and able to process both hiokis. 
+## DataProcessingMaster is dynamic, and able to process both hiokis. 
 
-### Only the data is being processed, the file is not automatically saved as a xlsx file. u have to manually SaveAs the file into an xlsx file.
+## Only the data is being processed, the file is not automatically saved as a xlsx file. u have to manually SaveAs the file into an xlsx file.
 
 # Customizing the Code
 
-## To adjust the parameters in the code, adjust the cell that you want to copy from, and adjust the rows and columns that you wish to delete.
+## To adjust the parameters in the code for hioki lr8450 and hioki lr8400, go to steps 3 and 4 and adjust the cell that you want to copy from, and adjust the rows and columns that you wish to delete.
