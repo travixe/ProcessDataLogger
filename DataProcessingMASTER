@@ -151,6 +151,21 @@ Sub ProcessData()
     ' ============================================================
     ws.Range("B2").Select
     ActiveWindow.FreezePanes = True
+
+    ' ============================================================
+    ' STEP 11: Adjust MIN formula for IP1 and IP2 (change row 61 to row 200)
+    ' ============================================================
+    Dim summaryCol As Long
+    
+    ' Search row 5 (summary header row) for IP1 and IP2 (case insensitive)
+    For summaryCol = 31 To ws.Cells(5, ws.Columns.Count).End(xlToLeft).Column
+        If UCase(ws.Cells(5, summaryCol).Value) = "IP1" Then
+            ws.Cells(7, summaryCol).Formula = "=MIN(" & ws.Cells(200, summaryCol - 29).Address & ":" & ws.Cells(10000, summaryCol - 29).Address & ")"
+        End If
+        If UCase(ws.Cells(5, summaryCol).Value) = "IP2" Then
+            ws.Cells(7, summaryCol).Formula = "=MIN(" & ws.Cells(200, summaryCol - 29).Address & ":" & ws.Cells(10000, summaryCol - 29).Address & ")"
+        End If
+    Next summaryCol
     
     MsgBox "done!!!"
 End Sub
