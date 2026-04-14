@@ -59,11 +59,13 @@ Now every time you open any Excel file, you can go to Developer → Macros and P
 
 # Things to note
 
+## - Data that is logged in the Data Loggers for BOTH hiokis MUST have a comment for the data to be processed. If there is no comment data logger, data will not be processed correctly.
+
 ## - HIOKI lr8400 was for set hh7001 config test, and HIOKI lr8450 was for set A3 config test
 
 ## - DataProcessingMaster is dynamic, and able to process both hiokis. 
 
-## - Only the data is being processed, the file is not automatically saved as a xlsx file. u have to manually SaveAs the file into an xlsx file.
+## - Only the data is being processed, the file is not automatically saved as a xlsx file. The user has to manually SaveAs the file into an xlsx file.
 
 # Customizing the Code
 
